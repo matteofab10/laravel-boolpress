@@ -2,17 +2,21 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Category;
 use App\Http\Controllers\Controller;
 use App\Post;
+use App\Tag;
 use Illuminate\Http\Request;
 
 class PostController extends Controller
 {
     public function index(){
 
-        $posts = Post::paginate(4);
+        $posts = Post::with(['category', 'tags'])->paginate(4);
+        $tags = Tag::all();
+        $categories = Category::all();
 
-        return response()->json($posts);
+        return response()->json(compact('posts', 'tags', 'categories'));
 
     }
 
