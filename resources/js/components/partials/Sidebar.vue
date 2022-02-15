@@ -6,6 +6,7 @@
         <span
           v-for="category in categories"
           :key="`cat${category.id}`"
+          @click="$emit('getPostCategory', category.slug)"
         >{{ category.name }}</span>
       </div>
     </div>
@@ -15,10 +16,16 @@
         <span
           v-for="tag in tags"
           :key="`tag${tag.id}`"
+          @click="$emit('getPostTag', tag.slug)"
         >{{ tag.name }}</span>
         
       </div>
     </div>
+
+    <button
+      @click="$emit('getAllPosts')"
+    >Tutti i post</button>
+
   </div>
 </template>
 
@@ -36,6 +43,14 @@ export default {
 
 .sidebar{
   max-width: 25%;
+  button{
+    border-radius: 6px;
+    border: none;
+    padding: 6px;
+    cursor: pointer;
+    color: red;
+    margin-left: 30px;
+  }
   .box{
     border: 2px solid grey;
     border-radius: 10px;

@@ -2149,6 +2149,9 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -2159,29 +2162,46 @@ __webpack_require__.r(__webpack_exports__);
   },
   data: function data() {
     return {
-      apiUrl: 'http://127.0.0.1:8000/api/posts?page=',
+      apiUrl: 'http://127.0.0.1:8000/api/posts',
       posts: null,
       pages: {},
       tags: [],
-      categories: []
+      categories: [],
+      title: 'I miei post'
     };
   },
   mounted: function mounted() {
     this.getPosts(this.apiUrl);
   },
   methods: {
-    getPosts: function getPosts() {
+    getPostTag: function getPostTag(slug_tag) {
       var _this = this;
 
+      axios.get(this.apiUrl + '/posttag/' + slug_tag).then(function (res) {
+        _this.posts = res.data.tag.posts;
+        _this.title = "I miei post per il tag: " + res.data.tag.name;
+      });
+    },
+    getPostCategory: function getPostCategory(slug_category) {
+      var _this2 = this;
+
+      axios.get(this.apiUrl + '/postcategory/' + slug_category).then(function (res) {
+        _this2.posts = res.data.category.posts;
+        _this2.title = "I miei post per la categoria: " + res.data.category.name;
+      });
+    },
+    getPosts: function getPosts() {
+      var _this3 = this;
+
       var page = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
-      axios.get(this.apiUrl + page).then(function (res) {
-        _this.posts = res.data.posts.data;
-        _this.categories = res.data.categories;
-        _this.tags = res.data.tags;
-        console.log(_this.categories, _this.tags);
-        _this.pages = {
-          current: res.data.current_page,
-          last: res.data.last_page
+      this.posts = null;
+      axios.get(this.apiUrl + '?page=' + page).then(function (res) {
+        _this3.posts = res.data.posts.data;
+        _this3.categories = res.data.categories;
+        _this3.tags = res.data.tags;
+        _this3.pages = {
+          current: res.data.posts.current_page,
+          last: res.data.posts.last_page
         };
       });
     }
@@ -2301,6 +2321,13 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -2518,7 +2545,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 
 // module
-exports.push([module.i, ".sidebar[data-v-438bbc0a] {\n  max-width: 25%;\n}\n.sidebar .box[data-v-438bbc0a] {\n  border: 2px solid grey;\n  border-radius: 10px;\n  padding: 30px 15px;\n  margin-bottom: 20px;\n  margin-left: 30px;\n}\n.sidebar .box h3[data-v-438bbc0a] {\n  margin-bottom: 15px;\n}\n.sidebar .box span[data-v-438bbc0a] {\n  display: inline-block;\n  padding: 2px 5px;\n  margin: 3px;\n  border-radius: 5px;\n  color: white;\n  cursor: pointer;\n}\n.sidebar .box .category span[data-v-438bbc0a] {\n  background-color: cadetblue;\n}\n.sidebar .box .category span[data-v-438bbc0a]:hover {\n  background-color: #9cd4d6;\n}\n.sidebar .box .tag span[data-v-438bbc0a] {\n  background-color: yellowgreen;\n}\n.sidebar .box .tag span[data-v-438bbc0a]:hover {\n  background-color: #bdee5c;\n}", ""]);
+exports.push([module.i, ".sidebar[data-v-438bbc0a] {\n  max-width: 25%;\n}\n.sidebar button[data-v-438bbc0a] {\n  border-radius: 6px;\n  border: none;\n  padding: 6px;\n  cursor: pointer;\n  color: red;\n  margin-left: 30px;\n}\n.sidebar .box[data-v-438bbc0a] {\n  border: 2px solid grey;\n  border-radius: 10px;\n  padding: 30px 15px;\n  margin-bottom: 20px;\n  margin-left: 30px;\n}\n.sidebar .box h3[data-v-438bbc0a] {\n  margin-bottom: 15px;\n}\n.sidebar .box span[data-v-438bbc0a] {\n  display: inline-block;\n  padding: 2px 5px;\n  margin: 3px;\n  border-radius: 5px;\n  color: white;\n  cursor: pointer;\n}\n.sidebar .box .category span[data-v-438bbc0a] {\n  background-color: cadetblue;\n}\n.sidebar .box .category span[data-v-438bbc0a]:hover {\n  background-color: #9cd4d6;\n}\n.sidebar .box .tag span[data-v-438bbc0a] {\n  background-color: yellowgreen;\n}\n.sidebar .box .tag span[data-v-438bbc0a]:hover {\n  background-color: #bdee5c;\n}", ""]);
 
 // exports
 
@@ -4135,7 +4162,7 @@ var render = function () {
         _c(
           "div",
           [
-            _c("h1", [_vm._v("i miei post")]),
+            _c("h1", [_vm._v(_vm._s(_vm.title))]),
             _vm._v(" "),
             _vm._l(_vm.posts, function (post) {
               return _c("PostItem", {
@@ -4192,6 +4219,11 @@ var render = function () {
         _vm._v(" "),
         _c("Sidebar", {
           attrs: { tags: _vm.tags, categories: _vm.categories },
+          on: {
+            getPostCategory: _vm.getPostCategory,
+            getPostTag: _vm.getPostTag,
+            getAllPosts: _vm.getPosts,
+          },
         }),
       ],
       1
@@ -4362,9 +4394,18 @@ var render = function () {
         "div",
         { staticClass: "category" },
         _vm._l(_vm.categories, function (category) {
-          return _c("span", { key: "cat" + category.id }, [
-            _vm._v(_vm._s(category.name)),
-          ])
+          return _c(
+            "span",
+            {
+              key: "cat" + category.id,
+              on: {
+                click: function ($event) {
+                  return _vm.$emit("getPostCategory", category.slug)
+                },
+              },
+            },
+            [_vm._v(_vm._s(category.name))]
+          )
         }),
         0
       ),
@@ -4377,11 +4418,34 @@ var render = function () {
         "div",
         { staticClass: "tag" },
         _vm._l(_vm.tags, function (tag) {
-          return _c("span", { key: "tag" + tag.id }, [_vm._v(_vm._s(tag.name))])
+          return _c(
+            "span",
+            {
+              key: "tag" + tag.id,
+              on: {
+                click: function ($event) {
+                  return _vm.$emit("getPostTag", tag.slug)
+                },
+              },
+            },
+            [_vm._v(_vm._s(tag.name))]
+          )
         }),
         0
       ),
     ]),
+    _vm._v(" "),
+    _c(
+      "button",
+      {
+        on: {
+          click: function ($event) {
+            return _vm.$emit("getAllPosts")
+          },
+        },
+      },
+      [_vm._v("Tutti i post")]
+    ),
   ])
 }
 var staticRenderFns = []
